@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import CoreGraphics
 
 // Puzzle structure in json
 struct GameData: Codable {
@@ -123,4 +124,10 @@ func combine(center: Int, outer: Int) -> Int {
   } else {
     return outer + 2
   }
+}
+
+func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
+    let xDistance = point1.x - point2.x
+    let yDistance = point1.y - point2.y
+    return (xDistance * xDistance + yDistance * yDistance).squareRoot()
 }
