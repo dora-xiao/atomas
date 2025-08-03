@@ -14,6 +14,9 @@ struct GameView: View {
   @State var positions: [CGPoint] = []
   @State var tapped: CGPoint = CGPoint(x: 0, y: 0)
   
+  // Animations
+  @State private var centerOffset: CGSize = .zero
+  
   var body: some View {
     ZStack {
       Color.clear
@@ -40,6 +43,10 @@ struct GameView: View {
               self.positions = newPositions
               
               appData.center = spawn(appData: appData)
+              
+              withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { // Using a spring animation
+                centerOffset = CGSize(width: newPositions[0].x - center.x, height: newPositions[0].y - center.y)
+              }
             }
         )
       
@@ -74,12 +81,13 @@ struct GameView: View {
       // Center element
       Tile(element: appData.center, elements: appData.elements)
         .position(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
+        .offset(centerOffset)
       
       // DEBUG: Tapped spot
-      Circle()
-        .fill(.red)
-        .frame(width: 5, height: 5)
-        .position(x: tapped.x, y: tapped.y)
+//      Circle()
+//        .fill(.red)
+//        .frame(width: 5, height: 5)
+//        .position(x: tapped.x, y: tapped.y)
     }
     .onAppear {
       self.positions = arrangeObjectsEquallySpaced(
