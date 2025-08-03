@@ -21,7 +21,8 @@ struct GameView: View {
           DragGesture(minimumDistance: 0)
             .onEnded { value in
               if(appData.board.count >= 18) { return }
-              let location = value.location
+              var location = value.location
+              location.y += 40
               print("Tapped at \(location)")
               
               let angle = angleForPoint(location, center: center)
@@ -48,6 +49,11 @@ struct GameView: View {
       // Restart Button
       Button(action: {
         appData.createAndLoadNewGame()
+        self.positions = arrangeObjectsEquallySpaced(
+          numberOfObjects: appData.board.count,
+          radius: radius,
+          center: center
+        )
       }) {
         Text("Restart")
       }
@@ -64,7 +70,7 @@ struct GameView: View {
       // Elements around circle
       ForEach(0..<positions.count, id: \.self) { i in
         Tile(element: appData.board[i], elements: appData.elements)
-          .position(x: positions[i].x, y: positions[i].y)
+          .position(x: self.positions[i].x, y: self.positions[i].y)
       }
       
       // Center element
@@ -107,10 +113,5 @@ struct GameView: View {
     }
     
     return 0
-  }
-  
-  
-  func reposition() {
-    
   }
 }
