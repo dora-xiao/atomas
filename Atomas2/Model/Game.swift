@@ -141,7 +141,7 @@ func angleBetween(from center: CGPoint, to target: CGPoint) -> CGFloat {
   let deltaX = target.x - center.x
   let deltaY = target.y - center.y
   let angleRadians = atan2(deltaY, deltaX)
-  return angleRadians * 180 / .pi
+  return angleRadians // * 180 / .pi
 }
 
 func findClosestPair(_ points: [CGPoint], _ myPoint: CGPoint, _ centerPoint: CGPoint) -> (Int, CGFloat)? {
