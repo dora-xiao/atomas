@@ -39,19 +39,13 @@ class AppData: ObservableObject {
         self.game = existingGame
         self.score = Int(existingGame.score)
         self.center = Int(existingGame.center)
-        self.board = (existingGame.board as? [String])?.compactMap { Int($0) } ?? []
+        self.board = existingGame.board!
       } else {
-        let newGame = Game(context: context)
-        newGame.score = -1
-        newGame.center = -1
-        newGame.board = []
-        try context.save()
-        self.game = newGame
+        newGame(appData: self)
       }
     } catch {
       print("Failed to fetch or create game: \(error)")
     }
-    self.board = [1, 2, 3, 4]
   }
 }
 

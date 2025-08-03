@@ -75,3 +75,40 @@ func loadElements() -> [Int: Element] {
     return [:]
   }
 }
+
+// Delete all saved data
+func deleteAllData(appData: AppData) {
+    let context = appData.context
+    let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Game.fetchRequest()
+    let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+
+    do {
+        try context.execute(batchDeleteRequest)
+        try context.save()
+        appData.loadGame()
+        print("Deleted all game data.")
+    } catch {
+        print("Failed to delete all game data: \(error)")
+    }
+}
+
+// Reset current game
+func newGame(appData: AppData) {
+  let newGame = Game(context: appData.context)
+  newGame.score = -1
+  newGame.center = -1
+  // Choose random starting board
+  let startOptions: [Int] = [1, 2, 3]
+  var temp: [Int] = []
+  for _ in 0..<6 {
+      if let chosen = startOptions.randomElement() {
+        temp.append(chosen)
+      }
+  }
+  newGame.board = temp
+  try! appData.context.save()
+  appData.game = newGame
+  appData.board = temp
+  appData.score = 0
+  appData.center = startOptions.randomElement()!
+}
