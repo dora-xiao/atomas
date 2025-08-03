@@ -35,13 +35,12 @@ struct Tile: View {
     ZStack {
       Circle()
         .fill(Color(UIColor(rgb: elements[element]!.color)))
-        .frame(width: 10, height: 10)
-        .padding(1)
+        .frame(width: 70, height: 70)
       
       Text(elements[element]!.symbol)
         .foregroundColor(Color.white)
         .bold()
-        .font(.title)
+        .font(.title3)
         .disabled(true)
     }
   }
