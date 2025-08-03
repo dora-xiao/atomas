@@ -99,3 +99,7 @@ extension ButtonStyle where Self == GhostButtonStyle {
         GhostButtonStyle()
     }
 }
+
+// TODO: tile pulse
+// TODO: calculate animation
+

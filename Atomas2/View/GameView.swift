@@ -9,14 +9,12 @@ import SwiftUI
 
 struct GameView: View {
   @EnvironmentObject var appData : AppData
+  let center: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
+  let radius: CGFloat = UIScreen.main.bounds.width/2-60
   
   var body: some View {
     ZStack {
-      let _ = print("Board: ", appData.board)
-      let _ = print("Center: ", appData.center)
-      let _ = print("Score: ", appData.score)
-      
-      let positions = arrangeObjectsEquallySpaced(numberOfObjects: appData.board.count, radius: UIScreen.main.bounds.width/2-60, center: CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40))
+      let positions = arrangeObjectsEquallySpaced(numberOfObjects: appData.board.count, radius: radius, center: center)
       
       // Restart Button
       Button(action: {
@@ -40,7 +38,7 @@ struct GameView: View {
       }
       
       // Center element
-      Tile(element: -2, elements: appData.elements)
+      Tile(element: appData.center, elements: appData.elements)
         .position(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
     }
   }

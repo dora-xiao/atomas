@@ -84,7 +84,7 @@ func loadElements() -> [Int: Element] {
 func spawn(appData: AppData) -> Int {
   appData.moves += 1
   appData.lastPlus += 1
-  if(appData.moves % 20 == 0) {
+  if(appData.moves % 20 == 0 && appData.moves > 18) {
     return -1 // minus
   } else if(appData.lastPlus > 4) {
     appData.lastPlus = 0
@@ -103,5 +103,16 @@ func spawn(appData: AppData) -> Int {
       return -2 // early plus
     }
     return rangeOptions.randomElement()!
+  }
+}
+
+// Accepts the combining atom numbers and returns the resulting atom
+func combine(center: Int, outer: Int) -> Int {
+  if(center == -2) { // center = "plus" atom
+    return outer + 1
+  } else if(center > outer) {
+    return center + 1
+  } else {
+    return outer + 2
   }
 }
