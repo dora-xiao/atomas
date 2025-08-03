@@ -20,6 +20,9 @@ class AppData: ObservableObject {
   @Published var score: Int = 0
   @Published var board: [Int] = []
   @Published var center: Int = 0
+  @Published var lastPlus: Int = 0
+  @Published var lastMinus: Int = 0
+  @Published var moves: Int = 0
 
   let context: NSManagedObjectContext
   var elements: [Int: Element] = [:]
@@ -40,6 +43,9 @@ class AppData: ObservableObject {
         self.score = Int(existingGame.score)
         self.center = Int(existingGame.center)
         self.board = existingGame.board!
+        self.moves = Int(existingGame.moves)
+        self.lastPlus = Int(existingGame.lastPlus)
+        self.lastMinus = Int(existingGame.lastMinus)
       } else {
         newGame(appData: self)
       }

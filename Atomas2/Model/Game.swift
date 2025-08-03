@@ -6,12 +6,18 @@ struct GameData: Codable {
   let score: Int
   let center: Int
   let board: [Int]
+  let moves: Int
+  let lastPlus: Int
+  let lastMinus: Int
 }
 
 var initGame: GameData = GameData(
   score: -1,
   center: -1,
-  board: []
+  board: [],
+  moves: 0,
+  lastPlus: 0,
+  lastMinus: 0
 )
 
 // Transformer for board
@@ -95,8 +101,6 @@ func deleteAllData(appData: AppData) {
 // Reset current game
 func newGame(appData: AppData) {
   let newGame = Game(context: appData.context)
-  newGame.score = -1
-  newGame.center = -1
   // Choose random starting board
   let startOptions: [Int] = [1, 2, 3]
   var temp: [Int] = []
@@ -111,4 +115,12 @@ func newGame(appData: AppData) {
   appData.board = temp
   appData.score = 0
   appData.center = startOptions.randomElement()!
+  appData.lastPlus = 0
+  appData.lastMinus = 0
+  appData.moves = 0
+}
+
+// Spawn next center tile
+func spawn(appData: AppData) {
+  
 }

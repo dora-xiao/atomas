@@ -5,11 +5,14 @@ import CoreData
 public class Game: NSManagedObject {}
 
 extension Game {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Game> {
-        return NSFetchRequest<Game>(entityName: "Game")
-    }
-
-    @NSManaged public var score: Int32
-    @NSManaged public var center: Int32
-    @NSManaged public var board: [Int]?
+  @nonobjc public class func fetchRequest() -> NSFetchRequest<Game> {
+    return NSFetchRequest<Game>(entityName: "Game")
+  }
+  
+  @NSManaged public var score: Int32
+  @NSManaged public var center: Int32
+  @NSManaged public var board: [Int]?
+  @NSManaged public var moves: Int32
+  @NSManaged public var lastPlus: Int32
+  @NSManaged public var lastMinus: Int32
 }
