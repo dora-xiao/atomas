@@ -85,24 +85,32 @@ func spawn(appData: AppData) -> Int {
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
+    print("Spawned minus")
     return -1 // minus
   } else if(appData.lastPlus > 4) {
     appData.lastPlus = 0
+    print("Spawned plus")
     return -2 // plus
   } else if(appData.score > 1500 && Int.random(in: 1...60) == 1) {
+    print("Spawned neutrino")
     return -3 // neutrinos
   } else {
     let rangeLower = Int(appData.moves / 40)
-    let rangeOptions = [rangeLower, rangeLower + 1, rangeLower + 2]
+    let rangeOptions = [rangeLower+1, rangeLower+2, rangeLower+3]
+    print("Spawn range: \(rangeOptions)")
     for b in Set(appData.board.filter{!rangeOptions.contains($0)}) {
       if(Int.random(in: 1...appData.board.count) == 1) {
+        print("Spawned \(b)")
         return b // board item not in range
       }
     }
     if(Int.random(in: 1...5) == 1) {
+      print("Spawned plus")
       return -2 // early plus
     }
-    return rangeOptions.randomElement()!
+    let chosenInRange = rangeOptions.randomElement()!
+    print("Spawned \(chosenInRange)")
+    return chosenInRange
   }
 }
 
