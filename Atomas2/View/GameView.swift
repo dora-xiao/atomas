@@ -13,6 +13,8 @@ struct GameView: View {
   let radius: CGFloat = UIScreen.main.bounds.width/2-60
   @State var positions: [CGPoint] = []
   @State var tapped: CGPoint = CGPoint(x: 0, y: 0)
+  @State var pair1: CGPoint = CGPoint(x: 0, y: 0)
+  @State var pair2: CGPoint = CGPoint(x: 0, y: 0)
   
   var body: some View {
     ZStack {
@@ -21,15 +23,30 @@ struct GameView: View {
         .gesture(
           DragGesture(minimumDistance: 0)
             .onEnded { value in
-              if(appData.board.count >= 18) { return }
+              if(appData.board.count >= 18) {
+                self.tapped = CGPoint(x: 0, y: 0)
+                self.pair1 = CGPoint(x: 0, y: 0)
+                self.pair2 = CGPoint(x: 0, y: 0)
+                return
+              }
               self.tapped = value.location
               print("Tapped at \(tapped)")
               
               let distanceToCenter = distance(tapped, center)
-              if(distanceToCenter > radius+10 || distanceToCenter < radius/2) { return } // tappable area
+              if(distanceToCenter > radius+10 || distanceToCenter < radius/2) { // tappable area
+                self.tapped = CGPoint(x: 0, y: 0)
+                self.pair1 = CGPoint(x: 0, y: 0)
+                self.pair2 = CGPoint(x: 0, y: 0)
+                return
+              }
               
-              // TODO: determine which position and coordinate position to insert
+              // Determine where to insert
+              let (closestIndex, closestP1, closestP2) = findClosestPair(self.positions, self.tapped)!
+              print(closestIndex, closestP1, closestP2)
+              self.pair1 = closestP1
+              self.pair2 = closestP2
               
+              return
               
               let angle = angleForPoint(self.tapped, center: center)
               let previewPositions = arrangeObjectsEquallySpaced(
@@ -88,6 +105,15 @@ struct GameView: View {
         .fill(.red)
         .frame(width: 5, height: 5)
         .position(x: tapped.x, y: tapped.y)
+      // DEBUG: Detected pair
+      Circle()
+        .stroke(Color.red, lineWidth: 1)
+        .frame(width: 50, height: 50)
+        .position(x: pair1.x, y: pair1.y)
+      Circle()
+        .stroke(Color.red, lineWidth: 1)
+        .frame(width: 50, height: 50)
+        .position(x: pair2.x, y: pair2.y)
     }
     .onAppear {
       self.positions = arrangeObjectsEquallySpaced(

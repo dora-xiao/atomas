@@ -25,9 +25,9 @@ class ArrayIntTransformer: NSSecureUnarchiveFromDataTransformer {
   override class var allowedTopLevelClasses: [AnyClass] {
     return [NSArray.self, NSNumber.self]
   }
-
+  
   static let name = NSValueTransformerName(rawValue: String(describing: ArrayIntTransformer.self))
-
+  
   public static func register() {
     let transformer = ArrayIntTransformer()
     ValueTransformer.setValueTransformer(transformer, forName: name)
@@ -47,11 +47,11 @@ struct Element {
 }
 
 func hexStringToInt(_ hexString: String) -> Int? {
-    // Remove the '#' prefix if it exists
-    let cleanHexString = hexString.hasPrefix("#") ? String(hexString.dropFirst()) : hexString
-
-    // Attempt to convert the hexadecimal string to an Int using radix 16
-    return Int(cleanHexString, radix: 16)
+  // Remove the '#' prefix if it exists
+  let cleanHexString = hexString.hasPrefix("#") ? String(hexString.dropFirst()) : hexString
+  
+  // Attempt to convert the hexadecimal string to an Int using radix 16
+  return Int(cleanHexString, radix: 16)
 }
 
 // Read elements json
@@ -127,7 +127,30 @@ func combine(center: Int, outer: Int) -> Int {
 }
 
 func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
-    let xDistance = point1.x - point2.x
-    let yDistance = point1.y - point2.y
-    return (xDistance * xDistance + yDistance * yDistance).squareRoot()
+  let xDistance = point1.x - point2.x
+  let yDistance = point1.y - point2.y
+  return (xDistance * xDistance + yDistance * yDistance).squareRoot()
+}
+
+func findClosestPair(_ points: [CGPoint], _ myPoint: CGPoint) -> (Int, CGPoint, CGPoint)? {
+  guard points.count >= 2 else {
+    return nil // Need at least two points to form an adjacent pair
+  }
+  
+  var closestDistance: CGFloat = .greatestFiniteMagnitude
+  var closestPair: (Int, CGPoint, CGPoint)? = nil
+  
+  for i in 0..<points.count {
+    let p1 = points[i]
+    let p2 = i == points.count - 1 ? points[0] : points[i+1]
+    
+    let midpoint = CGPoint(x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2)
+    let currentDistance = distance(midpoint, myPoint)
+    
+    if currentDistance < closestDistance {
+      closestDistance = currentDistance
+      closestPair = (i, p1, p2)
+    }
+  }
+  return closestPair
 }
