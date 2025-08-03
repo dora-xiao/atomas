@@ -8,7 +8,6 @@ struct GameData: Codable {
   let board: [Int]
   let moves: Int
   let lastPlus: Int
-  let lastMinus: Int
 }
 
 var initGame: GameData = GameData(
@@ -17,7 +16,6 @@ var initGame: GameData = GameData(
   board: [],
   moves: 0,
   lastPlus: 0,
-  lastMinus: 0
 )
 
 // Transformer for board
@@ -82,45 +80,28 @@ func loadElements() -> [Int: Element] {
   }
 }
 
-// Delete all saved data
-func deleteAllData(appData: AppData) {
-    let context = appData.context
-    let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Game.fetchRequest()
-    let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
-    do {
-        try context.execute(batchDeleteRequest)
-        try context.save()
-        appData.loadGame()
-        print("Deleted all game data.")
-    } catch {
-        print("Failed to delete all game data: \(error)")
-    }
-}
-
-// Reset current game
-func newGame(appData: AppData) {
-  let newGame = Game(context: appData.context)
-  // Choose random starting board
-  let startOptions: [Int] = [1, 2, 3]
-  var temp: [Int] = []
-  for _ in 0..<6 {
-      if let chosen = startOptions.randomElement() {
-        temp.append(chosen)
-      }
-  }
-  newGame.board = temp
-  try! appData.context.save()
-  appData.game = newGame
-  appData.board = temp
-  appData.score = 0
-  appData.center = startOptions.randomElement()!
-  appData.lastPlus = 0
-  appData.lastMinus = 0
-  appData.moves = 0
-}
-
 // Spawn next center tile
-func spawn(appData: AppData) {
-  
+func spawn(appData: AppData) -> Int {
+  appData.moves += 1
+  appData.lastPlus += 1
+  if(appData.moves % 20 == 0) {
+    return -1 // minus
+  } else if(appData.lastPlus > 4) {
+    appData.lastPlus = 0
+    return -2 // plus
+  } else if(appData.score > 1500 && Int.random(in: 1...60) == 1) {
+    return -3 // neutrinos
+  } else {
+    let rangeLower = Int(appData.moves / 40)
+    let rangeOptions = [rangeLower, rangeLower + 1, rangeLower + 2]
+    for b in Set(appData.board.filter{!rangeOptions.contains($0)}) {
+      if(Int.random(in: 1...appData.board.count) == 1) {
+        return b // board item not in range
+      }
+    }
+    if(Int.random(in: 1...5) == 1) {
+      return -2 // early plus
+    }
+    return rangeOptions.randomElement()!
+  }
 }

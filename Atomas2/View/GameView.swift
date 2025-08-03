@@ -13,23 +13,35 @@ struct GameView: View {
   var body: some View {
     ZStack {
       let _ = print("Board: ", appData.board)
+      let _ = print("Center: ", appData.center)
+      let _ = print("Score: ", appData.score)
+      
       let positions = arrangeObjectsEquallySpaced(numberOfObjects: appData.board.count, radius: UIScreen.main.bounds.width/2-60, center: CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40))
       
-      Circle()
-        .stroke(Color.gray, lineWidth: 1)
-        .frame(width: UIScreen.main.bounds.width-50, height: UIScreen.main.bounds.width-50)
-      
-      ForEach(0..<positions.count, id: \.self) { i in
-        Tile(element: appData.board[i], elements: appData.elements).position(x: positions[i].x, y: positions[i].y)
-      }
-      
+      // Restart Button
       Button(action: {
-        newGame(appData: appData)
+        appData.createAndLoadNewGame()
       }) {
         Text("Restart")
       }
       .buttonStyle(.ghost)
       .position(x: 60, y: 30)
+      
+      // Circle outline
+      Circle()
+        .stroke(Color.gray, lineWidth: 1)
+        .frame(width: UIScreen.main.bounds.width-50, height: UIScreen.main.bounds.width-50)
+      
+      // TODO: Longest chain highlight
+      
+      // Elements around circle
+      ForEach(0..<positions.count, id: \.self) { i in
+        Tile(element: appData.board[i], elements: appData.elements).position(x: positions[i].x, y: positions[i].y)
+      }
+      
+      // Center element
+      Tile(element: appData.center, elements: appData.elements)
+        .position(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2)
     }
   }
 }

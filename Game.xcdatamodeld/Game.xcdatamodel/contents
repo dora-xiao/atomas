@@ -3,7 +3,6 @@
     <entity name="Game" representedClassName="Game" syncable="YES">
         <attribute name="board" optional="YES" attributeType="Transformable" valueTransformerName="ArrayIntTransformer"/>
         <attribute name="center" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="lastMinus" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="lastPlus" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="moves" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="score" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
