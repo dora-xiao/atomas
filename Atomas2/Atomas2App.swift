@@ -105,6 +105,8 @@ class AppData: ObservableObject {
       self.center = Int(newGame.center)
       self.lastPlus = 0
       self.moves = 0
+      
+      self.board = [1, 2, 3, 4, 5, 6]
       print("Started new game: Score = \(self.score), Board = \(self.board), Center = \(self.center), Moves = \(self.moves), lastPlus = \(self.lastPlus)")
     } catch {
       print("Failed to save new game: \(error)")

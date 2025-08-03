@@ -81,36 +81,41 @@ func loadElements() -> [Int: Element] {
   }
 }
 
+extension Array {
+  func wrapped(startingAt index: Int) -> [Element] {
+    guard !self.isEmpty else { return [] } // Handle empty array
+    let effectiveIndex = (index % self.count + self.count) % self.count // Handle negative or out-of-bounds indices
+    
+    let suffix = self.suffix(from: effectiveIndex)
+    let prefix = self.prefix(upTo: effectiveIndex)
+    
+    return Array(suffix) + Array(prefix)
+  }
+}
+
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
-    print("Spawned minus")
     return -1 // minus
   } else if(appData.lastPlus > 4) {
     appData.lastPlus = 0
-    print("Spawned plus")
     return -2 // plus
   } else if(appData.score > 1500 && Int.random(in: 1...60) == 1) {
-    print("Spawned neutrino")
     return -3 // neutrinos
   } else {
     let rangeLower = Int(appData.moves / 40)
     let rangeOptions = [rangeLower+1, rangeLower+2, rangeLower+3]
-    print("Spawn range: \(rangeOptions)")
     for b in Set(appData.board.filter{!rangeOptions.contains($0)}) {
       if(Int.random(in: 1...appData.board.count) == 1) {
-        print("Spawned \(b)")
         return b // board item not in range
       }
     }
     if(Int.random(in: 1...5) == 1) {
-      print("Spawned plus")
       return -2 // early plus
     }
     let chosenInRange = rangeOptions.randomElement()!
-    print("Spawned \(chosenInRange)")
     return chosenInRange
   }
 }
@@ -132,25 +137,46 @@ func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
   return (xDistance * xDistance + yDistance * yDistance).squareRoot()
 }
 
-func findClosestPair(_ points: [CGPoint], _ myPoint: CGPoint) -> (Int, CGPoint, CGPoint)? {
+func angleBetween(from center: CGPoint, to target: CGPoint) -> CGFloat {
+  let deltaX = target.x - center.x
+  let deltaY = target.y - center.y
+  let angleRadians = atan2(deltaY, deltaX)
+  return angleRadians * 180 / .pi
+}
+
+func findClosestPair(_ points: [CGPoint], _ myPoint: CGPoint, _ centerPoint: CGPoint) -> (Int, CGFloat)? {
   guard points.count >= 2 else {
     return nil // Need at least two points to form an adjacent pair
   }
   
   var closestDistance: CGFloat = .greatestFiniteMagnitude
-  var closestPair: (Int, CGPoint, CGPoint)? = nil
+  var closestPair: (Int, CGFloat)? = nil
   
   for i in 0..<points.count {
     let p1 = points[i]
-    let p2 = i == points.count - 1 ? points[0] : points[i+1]
+    let secondIndex = i == points.count - 1 ? 0 : i+1
+    let p2 = points[secondIndex]
     
     let midpoint = CGPoint(x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2)
+    let midpointAngle = angleBetween(from: centerPoint, to: midpoint) // TODO: something is wrong with angle
     let currentDistance = distance(midpoint, myPoint)
     
     if currentDistance < closestDistance {
       closestDistance = currentDistance
-      closestPair = (i, p1, p2)
+      closestPair = (secondIndex, midpointAngle)
     }
   }
   return closestPair
+}
+
+func arrange(_ appData: AppData,  _ centerPoint: CGPoint, _ radius: CGFloat, _ closestIndex: Int, _ midpointAngle: CGFloat) -> [CGPoint] {
+  appData.board.insert(appData.center, at: closestIndex)
+  appData.board = appData.board.wrapped(startingAt: closestIndex)
+  print("Inserted \(appData.elements[appData.center]!.symbol) at index \(closestIndex): \(appData.board)")
+  
+  return arrangeObjectsEquallySpaced(
+    numberOfObjects: appData.board.count,
+    radius: radius,
+    center: centerPoint,
+    startAngle: midpointAngle)
 }

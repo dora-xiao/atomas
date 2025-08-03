@@ -13,8 +13,6 @@ struct GameView: View {
   let radius: CGFloat = UIScreen.main.bounds.width/2-60
   @State var positions: [CGPoint] = []
   @State var tapped: CGPoint = CGPoint(x: 0, y: 0)
-  @State var pair1: CGPoint = CGPoint(x: 0, y: 0)
-  @State var pair2: CGPoint = CGPoint(x: 0, y: 0)
   
   var body: some View {
     ZStack {
@@ -25,8 +23,6 @@ struct GameView: View {
             .onEnded { value in
               if(appData.board.count >= 18) {
                 self.tapped = CGPoint(x: 0, y: 0)
-                self.pair1 = CGPoint(x: 0, y: 0)
-                self.pair2 = CGPoint(x: 0, y: 0)
                 return
               }
               self.tapped = value.location
@@ -35,37 +31,15 @@ struct GameView: View {
               let distanceToCenter = distance(tapped, center)
               if(distanceToCenter > radius+10 || distanceToCenter < radius/2) { // tappable area
                 self.tapped = CGPoint(x: 0, y: 0)
-                self.pair1 = CGPoint(x: 0, y: 0)
-                self.pair2 = CGPoint(x: 0, y: 0)
                 return
               }
               
               // Determine where to insert
-              let (closestIndex, closestP1, closestP2) = findClosestPair(self.positions, self.tapped)!
-              print(closestIndex, closestP1, closestP2)
-              self.pair1 = closestP1
-              self.pair2 = closestP2
+              let (closestIndex, midpointAngle) = findClosestPair(self.positions, self.tapped, self.center)!
+              let newPositions = arrange(self.appData, self.center, self.radius, closestIndex, midpointAngle)
+              self.positions = newPositions
               
-              return
-              
-              let angle = angleForPoint(self.tapped, center: center)
-              let previewPositions = arrangeObjectsEquallySpaced(
-                numberOfObjects: appData.board.count + 1,
-                radius: radius,
-                center: center
-              )
-              let insertIndex = findInsertionIndex(for: angle, in: previewPositions, center: center)
-              
-              // Insert center element into board
-              appData.board.insert(appData.center, at: insertIndex)
-              appData.center = spawn(appData: appData)  // Reset center or spawn a new one however you prefer
-              
-              // Recalculate positions
-              self.positions = arrangeObjectsEquallySpaced(
-                numberOfObjects: appData.board.count,
-                radius: radius,
-                center: center
-              )
+              appData.center = spawn(appData: appData)
             }
         )
       
@@ -75,7 +49,8 @@ struct GameView: View {
         self.positions = arrangeObjectsEquallySpaced(
           numberOfObjects: appData.board.count,
           radius: radius,
-          center: center
+          center: center,
+          startAngle: 0
         )
       }) {
         Text("Restart")
@@ -105,51 +80,14 @@ struct GameView: View {
         .fill(.red)
         .frame(width: 5, height: 5)
         .position(x: tapped.x, y: tapped.y)
-      // DEBUG: Detected pair
-      Circle()
-        .stroke(Color.red, lineWidth: 1)
-        .frame(width: 50, height: 50)
-        .position(x: pair1.x, y: pair1.y)
-      Circle()
-        .stroke(Color.red, lineWidth: 1)
-        .frame(width: 50, height: 50)
-        .position(x: pair2.x, y: pair2.y)
     }
     .onAppear {
       self.positions = arrangeObjectsEquallySpaced(
         numberOfObjects: appData.board.count,
         radius: radius,
-        center: center
+        center: center,
+        startAngle: 0
       )
     }
-  }
-  
-  func angleForPoint(_ point: CGPoint, center: CGPoint) -> CGFloat {
-    let dx = point.x - center.x
-    let dy = point.y - center.y
-    var angle = atan2(dy, dx)
-    if angle < 0 { angle += 2 * .pi }
-    return angle
-  }
-  
-  func findInsertionIndex(for angle: CGFloat, in positions: [CGPoint], center: CGPoint) -> Int {
-    let angles = positions.map { point -> CGFloat in
-      var theta = atan2(point.y - center.y, point.x - center.x)
-      if theta < 0 { theta += 2 * .pi }
-      return theta
-    }
-    
-    for i in 0..<angles.count {
-      let current = angles[i]
-      let next = angles[(i + 1) % angles.count]
-      let start = current
-      let end = next > current ? next : next + 2 * .pi
-      
-      if angle >= start && angle < end {
-        return (i + 1) % angles.count
-      }
-    }
-    
-    return 0
   }
 }

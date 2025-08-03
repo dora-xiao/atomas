@@ -32,13 +32,14 @@ extension Color {
 func arrangeObjectsEquallySpaced(
     numberOfObjects: Int,
     radius: CGFloat,
-    center: CGPoint
+    center: CGPoint,
+    startAngle: CGFloat
 ) -> [CGPoint] {
     var objectPositions: [CGPoint] = []
     let angleIncrement = (2 * Double.pi) / Double(numberOfObjects)
 
     for i in 0..<numberOfObjects {
-        let angle = Double(i) * angleIncrement
+        let angle = Double(i) * angleIncrement + startAngle
         let x = center.x + radius * CGFloat(cos(angle))
         let y = center.y + radius * CGFloat(sin(angle))
         objectPositions.append(CGPoint(x: x, y: y))
@@ -101,5 +102,4 @@ extension ButtonStyle where Self == GhostButtonStyle {
 }
 
 // TODO: tile pulse
-// TODO: calculate animation
 
