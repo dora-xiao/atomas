@@ -66,11 +66,13 @@ struct Tile: View {
           .font(.system(size: 18))
           .disabled(true)
           .padding(0)
-        Text(String(element))
-          .foregroundColor(Color.white)
-          .font(.system(size: 10))
-          .disabled(true)
-          .padding(0)
+        if(element > 0) {
+          Text(String(element))
+            .foregroundColor(Color.white)
+            .font(.system(size: 10))
+            .disabled(true)
+            .padding(0)
+        }
       }
     }
   }

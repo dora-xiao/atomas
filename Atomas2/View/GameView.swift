@@ -40,7 +40,7 @@ struct GameView: View {
       }
       
       // Center element
-      Tile(element: appData.center, elements: appData.elements)
+      Tile(element: -2, elements: appData.elements)
         .position(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
     }
   }

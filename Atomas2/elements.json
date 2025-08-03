@@ -1,4 +1,19 @@
 {
+    "-1": {
+        "symbol": "-",
+        "name": "Minus",
+        "color": "#3b79c7"
+    },
+    "-2": {
+        "symbol": "+",
+        "name": "Plus",
+        "color": "#bb3e39"
+    },
+    "-3": {
+        "symbol": " ",
+        "name": "Neutrino",
+        "color": "#d2cbcb"
+    },
     "1": {
         "symbol": "H",
         "name": "Hydrogen",
