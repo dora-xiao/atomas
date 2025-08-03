@@ -51,6 +51,7 @@ class AppData: ObservableObject {
     } catch {
       print("Failed to fetch or create game: \(error)")
     }
+    self.board = [1, 2, 3, 4]
   }
 }
 

@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 import SwiftUI
+import CoreGraphics
 
 // Extend UIColor to accept hexcodes
 extension UIColor {
@@ -27,6 +28,27 @@ extension Color {
   static let customWhite = Color(UIColor(rgb: 0xFAFAFA))
 }
 
+// Arrange around board circle
+func arrangeObjectsEquallySpaced(
+    numberOfObjects: Int,
+    radius: CGFloat,
+    center: CGPoint
+) -> [CGPoint] {
+    var objectPositions: [CGPoint] = []
+    let angleIncrement = (2 * Double.pi) / Double(numberOfObjects)
+
+    for i in 0..<numberOfObjects {
+        let angle = Double(i) * angleIncrement
+        let x = center.x + radius * CGFloat(cos(angle))
+        let y = center.y + radius * CGFloat(sin(angle))
+        objectPositions.append(CGPoint(x: x, y: y))
+    }
+
+    return objectPositions
+}
+
+
+// Element circle
 struct Tile: View {
   var element: Int
   var elements: [Int: Element]
@@ -35,12 +57,12 @@ struct Tile: View {
     ZStack {
       Circle()
         .fill(Color(UIColor(rgb: elements[element]!.color)))
-        .frame(width: 70, height: 70)
+        .frame(width: 50, height: 50)
       
       Text(elements[element]!.symbol)
         .foregroundColor(Color.white)
         .bold()
-        .font(.title3)
+        .font(.subheadline)
         .disabled(true)
     }
   }
