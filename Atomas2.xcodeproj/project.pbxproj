@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		86ECABAB2E3EDAB600FFAB47 /* Game.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 86ECABA92E3EDAB600FFAB47 /* Game.xcdatamodeld */; };
+		86ECABAD2E3EE0AD00FFAB47 /* Game+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86ECABAC2E3EE0AD00FFAB47 /* Game+CoreData.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		86ECAB792E3ED4FB00FFAB47 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,22 +32,14 @@
 		86ECAB6B2E3ED4FA00FFAB47 /* Atomas2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Atomas2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86ECAB782E3ED4FB00FFAB47 /* Atomas2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Atomas2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		86ECAB822E3ED4FB00FFAB47 /* Atomas2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Atomas2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		86ECABAA2E3EDAB600FFAB47 /* Game.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Game.xcdatamodel; sourceTree = "<group>"; };
+		86ECABAC2E3EE0AD00FFAB47 /* Game+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Game+CoreData.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		86ECAB6D2E3ED4FA00FFAB47 /* Atomas2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Atomas2;
-			sourceTree = "<group>";
-		};
-		86ECAB7B2E3ED4FB00FFAB47 /* Atomas2Tests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Atomas2Tests;
-			sourceTree = "<group>";
-		};
-		86ECAB852E3ED4FB00FFAB47 /* Atomas2UITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Atomas2UITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +72,9 @@
 		86ECAB622E3ED4F900FFAB47 = {
 			isa = PBXGroup;
 			children = (
+				86ECABAC2E3EE0AD00FFAB47 /* Game+CoreData.swift */,
+				86ECABA92E3EDAB600FFAB47 /* Game.xcdatamodeld */,
 				86ECAB6D2E3ED4FA00FFAB47 /* Atomas2 */,
-				86ECAB7B2E3ED4FB00FFAB47 /* Atomas2Tests */,
-				86ECAB852E3ED4FB00FFAB47 /* Atomas2UITests */,
 				86ECAB6C2E3ED4FA00FFAB47 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +127,6 @@
 			dependencies = (
 				86ECAB7A2E3ED4FB00FFAB47 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				86ECAB7B2E3ED4FB00FFAB47 /* Atomas2Tests */,
-			);
 			name = Atomas2Tests;
 			packageProductDependencies = (
 			);
@@ -152,9 +146,6 @@
 			);
 			dependencies = (
 				86ECAB842E3ED4FB00FFAB47 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				86ECAB852E3ED4FB00FFAB47 /* Atomas2UITests */,
 			);
 			name = Atomas2UITests;
 			packageProductDependencies = (
@@ -236,6 +227,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86ECABAB2E3EDAB600FFAB47 /* Game.xcdatamodeld in Sources */,
+				86ECABAD2E3EE0AD00FFAB47 /* Game+CoreData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +315,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -380,7 +373,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -558,6 +551,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		86ECABA92E3EDAB600FFAB47 /* Game.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				86ECABAA2E3EDAB600FFAB47 /* Game.xcdatamodel */,
+			);
+			currentVersion = 86ECABAA2E3EDAB600FFAB47 /* Game.xcdatamodel */;
+			path = Game.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 86ECAB632E3ED4F900FFAB47 /* Project object */;
 }
