@@ -22,11 +22,13 @@ class AppData: ObservableObject {
   @Published var center: Int = 0
 
   let context: NSManagedObjectContext
+  var elements: [Int: Element] = [:]
   var game: Game?
 
   init(context: NSManagedObjectContext) {
     self.context = context
     self.loadGame()
+    self.elements = loadElements()
   }
 
   func loadGame() {
