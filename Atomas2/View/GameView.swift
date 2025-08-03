@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct GameView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+  @EnvironmentObject var appData : AppData
+  
+  var body: some View {
+    VStack {
+      Tile(element: 1, elements: appData.elements)
+      Tile(element: 2, elements: appData.elements)
     }
-}
-
-#Preview {
-    GameView()
+  }
 }

@@ -59,7 +59,7 @@ func loadElements() -> [Int: Element] {
   do {
     let data = try Data(contentsOf: url)
     let decoder = JSONDecoder()
-    var elementsById = try decoder.decode([String: ElementJson].self, from: data)
+    let elementsById = try decoder.decode([String: ElementJson].self, from: data)
     var result: [Int: Element] = [:]
     for (key, value) in elementsById {
       result[Int(key)!] = Element(
