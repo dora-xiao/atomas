@@ -59,11 +59,19 @@ struct Tile: View {
         .fill(Color(UIColor(rgb: elements[element]!.color)))
         .frame(width: 50, height: 50)
       
-      Text(elements[element]!.symbol)
-        .foregroundColor(Color.white)
-        .bold()
-        .font(.subheadline)
-        .disabled(true)
+      VStack {
+        Text(elements[element]!.symbol)
+          .foregroundColor(Color.white)
+          .bold()
+          .font(.system(size: 18))
+          .disabled(true)
+          .padding(0)
+        Text(String(element))
+          .foregroundColor(Color.white)
+          .font(.system(size: 10))
+          .disabled(true)
+          .padding(0)
+      }
     }
   }
 }
