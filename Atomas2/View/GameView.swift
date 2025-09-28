@@ -13,9 +13,9 @@ struct GameView: View {
   let radius: CGFloat = UIScreen.main.bounds.width/2-60
   @State var rotations: [Angle] = []
   @State var tapped: CGPoint = CGPoint(x: 0, y: 0)
-  
-  // Animations
-  @State private var centerOffset: CGSize = .zero
+  @State var destIndex: Int = 0
+  @State var destAngle: Angle = Angle(degrees: 0)
+  @State var centerPos: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
   
   var body: some View {
     ZStack {
@@ -39,12 +39,22 @@ struct GameView: View {
                 return
               }
               
-              // Determine where to insert
-              withAnimation(.linear(duration: 0.5)){
-                self.rotations = insert(self.center, self.tapped, self.rotations, self.radius, self.appData)
-                //insert(self.appData, self.center, self.radius, self.rotations, self.tapped)
+              // Animate
+              withAnimation(.linear(duration: 0.2)){
+                // Slide to rearrange
+                let (destIndex, destAngle, newRotations) = insert(
+                  self.center, self.tapped, self.rotations, self.radius, self.appData
+                )
+                self.destIndex = destIndex
+                self.destAngle = destAngle
+                self.rotations = newRotations
+                self.centerPos = getCirclePoint(self.center, self.radius, self.destAngle.radians)
+              } completion: {
+                self.appData.board.insert(appData.center, at: self.destIndex)
+                self.rotations.insert(self.destAngle, at: self.destIndex)
+                self.appData.center = spawn(appData: self.appData)
+                self.centerPos = self.center
               }
-               // appData.center = spawn(appData: appData)
             }
         )
       
@@ -74,7 +84,7 @@ struct GameView: View {
       
       // Center element
       Tile(element: appData.center, elements: appData.elements)
-        .position(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
+        .position(centerPos)
       
       // DEBUG: Tapped spot
       Circle()

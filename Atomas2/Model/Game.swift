@@ -270,11 +270,11 @@ func insert(
   _ rotations: [Angle],
   _ radius: CGFloat,
   _ appData: AppData
-) -> [Angle] {
+) -> (Int, Angle, [Angle]) {
   // Find index and angle to insert at
   guard let (closestIndex, midpointAngle) = findClosestPair(rotations, tapped, centerPoint)
   else {
-    return rotations
+    return (0, Angle(degrees: 0), rotations)
   }
   
   appData.board.insert(appData.center, at: closestIndex)
@@ -291,5 +291,5 @@ func insert(
   newRotations.remove(at: closestIndex)
   print("Removing at \(closestIndex): \(newRotations)")
   appData.board.remove(at: closestIndex)
-  return newRotations
+  return (closestIndex, midpointAngle, newRotations)
 }
