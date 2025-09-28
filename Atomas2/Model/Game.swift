@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import CoreData
 import CoreGraphics
 
@@ -137,46 +138,158 @@ func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
   return (xDistance * xDistance + yDistance * yDistance).squareRoot()
 }
 
-func angleBetween(from center: CGPoint, to target: CGPoint) -> CGFloat {
-  let deltaX = target.x - center.x
-  let deltaY = target.y - center.y
-  let angleRadians = atan2(deltaY, deltaX)
-  return angleRadians // * 180 / .pi
+func angleBetween(from: CGPoint, to: CGPoint) -> CGFloat {
+  atan2(to.y - from.y, to.x - from.x)
 }
 
-func findClosestPair(_ points: [CGPoint], _ myPoint: CGPoint, _ centerPoint: CGPoint) -> (Int, CGFloat)? {
-  guard points.count >= 2 else {
-    return nil // Need at least two points to form an adjacent pair
+func normalizeAngle(_ angle: Double) -> Double {
+  let twoPi = 2 * Double.pi
+  var a = angle.truncatingRemainder(dividingBy: twoPi)
+  if a < 0 { a += twoPi }
+  return a
+}
+
+func angularDistance(_ a1: CGFloat, _ a2: Double) -> CGFloat {
+  let diff = abs(CGFloat(normalizeAngle(Double(a1) - a2)))
+  return min(diff, 2 * .pi - diff)
+}
+
+/// Midpoint between two angles, respecting wrap-around
+func midpointAngle(_ a1: Double, _ a2: Double) -> Double {
+  let a1n = normalizeAngle(a1)
+  let a2n = normalizeAngle(a2)
+  let diff = normalizeAngle(a2n - a1n)
+  
+  if diff <= .pi {
+    // Normal case: a2 is ahead of a1 in CCW direction
+    return normalizeAngle(a1n + diff / 2)
+  } else {
+    // Take the shorter arc the other way around
+    let backDiff = 2 * .pi - diff
+    return normalizeAngle(a2n + backDiff / 2)
   }
+}
+
+
+func findClosestPair(
+  _ rotations: [Angle],
+  _ tapped: CGPoint,
+  _ centerPoint: CGPoint
+) -> (Int, Angle)? {
+  guard rotations.count >= 2 else { return nil }
   
+  let tapAngle = angleBetween(from: centerPoint, to: tapped)
   var closestDistance: CGFloat = .greatestFiniteMagnitude
-  var closestPair: (Int, CGFloat)? = nil
+  var closestResult: (Int, Angle)? = nil
   
-  for i in 0..<points.count {
-    let p1 = points[i]
-    let secondIndex = i == points.count - 1 ? 0 : i+1
-    let p2 = points[secondIndex]
+  for i in 0..<rotations.count {
+    let j = (i + 1) % rotations.count
     
-    let midpoint = CGPoint(x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2)
-    let midpointAngle = angleBetween(from: centerPoint, to: midpoint) // TODO: something is wrong with angle
-    let currentDistance = distance(midpoint, myPoint)
+    let angle1 = rotations[i].radians
+    let angle2 = rotations[j].radians
     
-    if currentDistance < closestDistance {
-      closestDistance = currentDistance
-      closestPair = (secondIndex, midpointAngle)
+    let mid = midpointAngle(angle1, angle2)
+    
+    let dist = angularDistance(tapAngle, mid)
+    if dist < closestDistance {
+      closestDistance = dist
+      closestResult = (j, Angle(radians: mid))
     }
   }
-  return closestPair
+  return closestResult
 }
 
-func arrange(_ appData: AppData,  _ centerPoint: CGPoint, _ radius: CGFloat, _ closestIndex: Int, _ midpointAngle: CGFloat) -> [CGPoint] {
-  appData.board.insert(appData.center, at: closestIndex)
-  appData.board = appData.board.wrapped(startingAt: closestIndex)
-  print("Inserted \(appData.elements[appData.center]!.symbol) at index \(closestIndex): \(appData.board)")
+//
+func initArrange(_ count: Int) -> [Angle] {
+  let increment = 2 * Double.pi / Double(count)
+  var result: [Angle] = Array(repeating: .radians(0), count: count)
   
-  return arrangeObjectsEquallySpaced(
-    numberOfObjects: appData.board.count,
-    radius: radius,
-    center: centerPoint,
-    startAngle: midpointAngle)
+  for i in 0..<result.count {
+    result[i] = Angle(radians: Double(i) * increment)
+  }
+  
+  return result
+}
+
+
+/// Evenly space objects around circle so that `fixedIndex` is exactly at `fixedAngle`
+func arrange(
+  prevRotations: [Angle],
+  fixedIndex: Int,
+  fixedAngle: Angle,
+  appData: AppData
+) -> [Angle] {
+  let increment = 2 * Double.pi / Double(prevRotations.count+1)
+  var result: [Angle] = Array(repeating: .radians(0), count: prevRotations.count+1)
+  result[fixedIndex] = fixedAngle
+  var prevRotationsInserted = prevRotations
+  prevRotationsInserted.insert(fixedAngle, at: fixedIndex)
+  
+  print("Fixed index \(fixedIndex), angle \(fixedAngle.degrees.rounded())")
+  
+  for i in 1..<result.count {
+    let j = (i + fixedIndex) % result.count
+    var newRotation = Angle(radians: fixedAngle.radians + Double(i) * increment)
+    print("j = \(j) | element = \(appData.elements[appData.board[j]]!.symbol) | prev rotation = \(prevRotationsInserted[j].degrees.rounded()) | proposed rotation = \(newRotation.degrees.rounded())")
+    
+//    if((i-1) < result.count / 2) { // clockwise
+//      print("Clockwise")
+//      while(newRotation.radians - prevRotationsInserted[j].radians < -2) {
+//        newRotation.radians += 2 * Double.pi
+//        print("    less than original (\(prevRotationsInserted[j].degrees.rounded()): \(newRotation.degrees.rounded())")
+//      }
+//    } else { // counter-clockwise
+//      print("Counter-clockwise")
+//      while(newRotation.radians - prevRotationsInserted[j].radians > 2) {
+//        newRotation.radians -= 2 * Double.pi
+//        print("    greater than original (\(prevRotationsInserted[j].degrees.rounded()): \(newRotation.degrees.rounded())")
+//      }
+//    }
+    if(newRotation.degrees - prevRotationsInserted[j].degrees > 180) {
+      newRotation.degrees -= 360
+    } else if(newRotation.degrees - prevRotationsInserted[j].degrees < -180) {
+      newRotation.degrees += 360
+    }
+    print("    final rotation \(newRotation.degrees)")
+    result[j] = newRotation
+  }
+  
+  print(result)
+  return result
+}
+
+func getCirclePoint(_ center: CGPoint, _ radius: CGFloat, _ angleRadians: CGFloat) -> CGPoint {
+  let x = center.x + radius * cos(angleRadians)
+  let y = center.y + radius * sin(angleRadians)
+  return CGPoint(x: x, y: y)
+}
+
+func insert(
+  _ centerPoint: CGPoint,
+  _ tapped: CGPoint,
+  _ rotations: [Angle],
+  _ radius: CGFloat,
+  _ appData: AppData
+) -> [Angle] {
+  // Find index and angle to insert at
+  guard let (closestIndex, midpointAngle) = findClosestPair(rotations, tapped, centerPoint)
+  else {
+    return rotations
+  }
+  
+  appData.board.insert(appData.center, at: closestIndex)
+  print("Inserted \(appData.center) into board at \(closestIndex): \(appData.board)")
+  
+  var newRotations = arrange(
+    prevRotations: rotations,
+    fixedIndex: closestIndex,
+    fixedAngle: midpointAngle,
+    appData: appData,
+  )
+  
+  print("New rotations: \(newRotations)")
+  newRotations.remove(at: closestIndex)
+  print("Removing at \(closestIndex): \(newRotations)")
+  appData.board.remove(at: closestIndex)
+  return newRotations
 }

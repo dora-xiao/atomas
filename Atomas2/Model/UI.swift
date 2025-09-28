@@ -28,26 +28,6 @@ extension Color {
   static let customWhite = Color(UIColor(rgb: 0xFAFAFA))
 }
 
-// Arrange around board circle
-func arrangeObjectsEquallySpaced(
-    numberOfObjects: Int,
-    radius: CGFloat,
-    center: CGPoint,
-    startAngle: CGFloat
-) -> [CGPoint] {
-    var objectPositions: [CGPoint] = []
-    let angleIncrement = (2 * Double.pi) / Double(numberOfObjects)
-
-    for i in 0..<numberOfObjects {
-        let angle = Double(i) * angleIncrement + startAngle
-        let x = center.x + radius * CGFloat(cos(angle))
-        let y = center.y + radius * CGFloat(sin(angle))
-        objectPositions.append(CGPoint(x: x, y: y))
-    }
-
-    return objectPositions
-}
-
 
 // Element circle
 struct Tile: View {
@@ -78,6 +58,7 @@ struct Tile: View {
     }
   }
 }
+
 
 struct GhostButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {

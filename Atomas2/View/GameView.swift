@@ -11,7 +11,7 @@ struct GameView: View {
   @EnvironmentObject var appData : AppData
   let center: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
   let radius: CGFloat = UIScreen.main.bounds.width/2-60
-  @State var positions: [CGPoint] = []
+  @State var rotations: [Angle] = []
   @State var tapped: CGPoint = CGPoint(x: 0, y: 0)
   
   // Animations
@@ -24,6 +24,7 @@ struct GameView: View {
         .gesture(
           DragGesture(minimumDistance: 0)
             .onEnded { value in
+              // Don't allow more than 18 tiles
               if(appData.board.count >= 18) {
                 self.tapped = CGPoint(x: 0, y: 0)
                 return
@@ -31,6 +32,7 @@ struct GameView: View {
               self.tapped = value.location
               print("Tapped at \(tapped)")
               
+              // Restrict tappable area
               let distanceToCenter = distance(tapped, center)
               if(distanceToCenter > radius+10 || distanceToCenter < radius/2) { // tappable area
                 self.tapped = CGPoint(x: 0, y: 0)
@@ -38,27 +40,18 @@ struct GameView: View {
               }
               
               // Determine where to insert
-              let (closestIndex, midpointAngle) = findClosestPair(self.positions, self.tapped, self.center)!
-              let newPositions = arrange(self.appData, self.center, self.radius, closestIndex, midpointAngle)
-              self.positions = newPositions
-              
-              appData.center = spawn(appData: appData)
-              
-              withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { // Using a spring animation
-                centerOffset = CGSize(width: newPositions[0].x - center.x, height: newPositions[0].y - center.y)
+              withAnimation(.linear(duration: 0.5)){
+                self.rotations = insert(self.center, self.tapped, self.rotations, self.radius, self.appData)
+                //insert(self.appData, self.center, self.radius, self.rotations, self.tapped)
               }
+               // appData.center = spawn(appData: appData)
             }
         )
       
       // Restart Button
       Button(action: {
         appData.createAndLoadNewGame()
-        self.positions = arrangeObjectsEquallySpaced(
-          numberOfObjects: appData.board.count,
-          radius: radius,
-          center: center,
-          startAngle: 0
-        )
+        self.rotations = initArrange(appData.board.count)
       }) {
         Text("Restart")
       }
@@ -73,29 +66,24 @@ struct GameView: View {
       // TODO: Longest chain highlight
       
       // Elements around circle
-      ForEach(0..<positions.count, id: \.self) { i in
+      ForEach(0..<rotations.count, id: \.self) { i in
         Tile(element: appData.board[i], elements: appData.elements)
-          .position(x: self.positions[i].x, y: self.positions[i].y)
+          .offset(x: radius)
+          .rotationEffect(rotations[i])
       }
       
       // Center element
       Tile(element: appData.center, elements: appData.elements)
         .position(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
-        .offset(centerOffset)
       
       // DEBUG: Tapped spot
-//      Circle()
-//        .fill(.red)
-//        .frame(width: 5, height: 5)
-//        .position(x: tapped.x, y: tapped.y)
+      Circle()
+        .fill(.red)
+        .frame(width: 5, height: 5)
+        .position(x: tapped.x, y: tapped.y)
     }
     .onAppear {
-      self.positions = arrangeObjectsEquallySpaced(
-        numberOfObjects: appData.board.count,
-        radius: radius,
-        center: center,
-        startAngle: 0
-      )
+      self.rotations = initArrange(appData.board.count)
     }
   }
 }

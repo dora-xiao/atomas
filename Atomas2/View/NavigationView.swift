@@ -6,6 +6,7 @@ struct NavigationView: View {
   var body: some View {
     switch (appData.currView) {
     case .game: GameView().environmentObject(self.appData)
+    case .temp: TempView().environmentObject(self.appData)
     }
   }
 }
