@@ -96,6 +96,7 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
+  return -1
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
@@ -135,7 +136,7 @@ func combineValue(center: Int, outer: Int) -> Int {
 /// Returns a list of tuples of the fixed index and the board states
 func combine(_ board: [Int], _ rotations: [Angle]) -> [(Int, [Int], [Angle])] {
   
-  
+  return []
 }
 
 func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
@@ -251,4 +252,9 @@ func insert(
   appData.board.remove(at: closestIndex)
   
   return (closestIndex, midpointAngle, newRotations)
+}
+
+
+func absorb(_ tileIndex: Int, _ tileAngle: Angle, _ rotations: [Angle], _ appData: AppData) -> [Angle] {
+  return rotations
 }

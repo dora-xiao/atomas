@@ -18,6 +18,7 @@ struct GameView: View {
   @State var destAngle: Angle = Angle(degrees: 0)
   @State var centerPos: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
   @State var disabled: Bool = false
+  @State var absorbIndex: Int = -1
   
   var body: some View {
     ZStack {
@@ -55,10 +56,18 @@ struct GameView: View {
               } else if(appData.center == -1 && tileIndex > -1) {
                 // Center is a minus, tapping a tile causes absorption
                 appData.prevCenter = -1
-                appData.center = appData.board[tileIndex]
-                
-                // TODO: shoot and rearrange
-                
+                withAnimation(.linear(duration: 0.2)) {
+                  self.disabled = true
+                  self.absorbIndex = tileIndex
+                  let newRotations = absorb(tileIndex, tileAngle, rotations, appData)
+                  self.rotations = newRotations
+                } completion: {
+                  appData.center = appData.board[tileIndex]
+                  self.appData.board.remove(at: tileIndex)
+                  self.rotations.remove(at: tileIndex)
+                  self.absorbIndex = -1
+                  self.disabled = false
+                }
               } else if((appData.center > 0 || appData.center == -2) && spaceIndex > -1) {
                 // Center is an element tile or a plus, tapping a space causes insertion
                 appData.prevCenter = appData.center
@@ -110,7 +119,7 @@ struct GameView: View {
       // Elements around circle
       ForEach(0..<rotations.count, id: \.self) { i in
         Tile(element: appData.board[i], elements: appData.elements, rotation: rotations[i], size: size)
-          .offset(x: radius)
+          .offset(x: i == absorbIndex ? 0 : radius )
           .rotationEffect(rotations[i])
       }
       
