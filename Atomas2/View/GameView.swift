@@ -39,7 +39,7 @@ struct GameView: View {
                 return
               }
               
-              // Animate
+              // Animate insertion
               withAnimation(.linear(duration: 0.2)){
                 // Slide to rearrange
                 let (destIndex, destAngle, newRotations) = insert(
@@ -50,6 +50,7 @@ struct GameView: View {
                 self.rotations = newRotations
                 self.centerPos = getCirclePoint(self.center, self.radius, self.destAngle.radians)
               } completion: {
+                // Add center to board/rotations and spawn a new center
                 self.appData.board.insert(appData.center, at: self.destIndex)
                 self.rotations.insert(self.destAngle, at: self.destIndex)
                 self.appData.center = spawn(appData: self.appData)
@@ -77,20 +78,20 @@ struct GameView: View {
       
       // Elements around circle
       ForEach(0..<rotations.count, id: \.self) { i in
-        Tile(element: appData.board[i], elements: appData.elements)
+        Tile(element: appData.board[i], elements: appData.elements, rotation: rotations[i])
           .offset(x: radius)
           .rotationEffect(rotations[i])
       }
       
       // Center element
-      Tile(element: appData.center, elements: appData.elements)
+      Tile(element: appData.center, elements: appData.elements, rotation: Angle(degrees: 0))
         .position(centerPos)
       
       // DEBUG: Tapped spot
-      Circle()
-        .fill(.red)
-        .frame(width: 5, height: 5)
-        .position(x: tapped.x, y: tapped.y)
+//      Circle()
+//        .fill(.red)
+//        .frame(width: 5, height: 5)
+//        .position(x: tapped.x, y: tapped.y)
     }
     .onAppear {
       self.rotations = initArrange(appData.board.count)

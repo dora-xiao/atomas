@@ -224,37 +224,18 @@ func arrange(
   result[fixedIndex] = fixedAngle
   var prevRotationsInserted = prevRotations
   prevRotationsInserted.insert(fixedAngle, at: fixedIndex)
-  
-  print("Fixed index \(fixedIndex), angle \(fixedAngle.degrees.rounded())")
-  
+    
   for i in 1..<result.count {
     let j = (i + fixedIndex) % result.count
     var newRotation = Angle(radians: fixedAngle.radians + Double(i) * increment)
-    print("j = \(j) | element = \(appData.elements[appData.board[j]]!.symbol) | prev rotation = \(prevRotationsInserted[j].degrees.rounded()) | proposed rotation = \(newRotation.degrees.rounded())")
-    
-//    if((i-1) < result.count / 2) { // clockwise
-//      print("Clockwise")
-//      while(newRotation.radians - prevRotationsInserted[j].radians < -2) {
-//        newRotation.radians += 2 * Double.pi
-//        print("    less than original (\(prevRotationsInserted[j].degrees.rounded()): \(newRotation.degrees.rounded())")
-//      }
-//    } else { // counter-clockwise
-//      print("Counter-clockwise")
-//      while(newRotation.radians - prevRotationsInserted[j].radians > 2) {
-//        newRotation.radians -= 2 * Double.pi
-//        print("    greater than original (\(prevRotationsInserted[j].degrees.rounded()): \(newRotation.degrees.rounded())")
-//      }
-//    }
     if(newRotation.degrees - prevRotationsInserted[j].degrees > 180) {
       newRotation.degrees -= 360
     } else if(newRotation.degrees - prevRotationsInserted[j].degrees < -180) {
       newRotation.degrees += 360
     }
-    print("    final rotation \(newRotation.degrees)")
     result[j] = newRotation
   }
   
-  print(result)
   return result
 }
 
@@ -278,18 +259,26 @@ func insert(
   }
   
   appData.board.insert(appData.center, at: closestIndex)
-  print("Inserted \(appData.center) into board at \(closestIndex): \(appData.board)")
   
-  var newRotations = arrange(
-    prevRotations: rotations,
-    fixedIndex: closestIndex,
-    fixedAngle: midpointAngle,
-    appData: appData,
-  )
+  let increment = 2 * Double.pi / Double(rotations.count+1)
+  var newRotations: [Angle] = Array(repeating: .radians(0), count: rotations.count+1)
+  newRotations[closestIndex] = midpointAngle
+  var rotationsInserted = rotations
+  rotationsInserted.insert(midpointAngle, at: closestIndex)
+    
+  for i in 1..<newRotations.count {
+    let j = (i + closestIndex) % newRotations.count
+    var newRotation = Angle(radians: midpointAngle.radians + Double(i) * increment)
+    if(newRotation.degrees - rotationsInserted[j].degrees > 190) {
+      newRotation.degrees -= 360
+    } else if(newRotation.degrees - rotationsInserted[j].degrees < -190) {
+      newRotation.degrees += 360
+    }
+    newRotations[j] = newRotation
+  }
   
-  print("New rotations: \(newRotations)")
   newRotations.remove(at: closestIndex)
-  print("Removing at \(closestIndex): \(newRotations)")
   appData.board.remove(at: closestIndex)
+  
   return (closestIndex, midpointAngle, newRotations)
 }

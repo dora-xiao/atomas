@@ -33,6 +33,7 @@ extension Color {
 struct Tile: View {
   var element: Int
   var elements: [Int: Element]
+  var rotation: Angle
   
   var body: some View {
     ZStack {
@@ -54,7 +55,7 @@ struct Tile: View {
             .disabled(true)
             .padding(0)
         }
-      }
+      }.rotationEffect(Angle(degrees: -rotation.degrees), anchor: .center)
     }
   }
 }

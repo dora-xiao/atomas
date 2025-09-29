@@ -11,7 +11,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 enum Views:Int {
   case game
-  case temp
 }
 
 // Environment variable for whole app
