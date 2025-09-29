@@ -96,7 +96,6 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
-  return -3
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
@@ -123,7 +122,7 @@ func spawn(appData: AppData) -> Int {
 }
 
 // Accepts the combining atom numbers and returns the resulting atom
-func combine(center: Int, outer: Int) -> Int {
+func combineValue(center: Int, outer: Int) -> Int {
   if(center == -2) { // center = "plus" atom
     return outer + 1
   } else if(center > outer) {
@@ -131,6 +130,12 @@ func combine(center: Int, outer: Int) -> Int {
   } else {
     return outer + 2
   }
+}
+
+/// Returns a list of tuples of the fixed index and the board states
+func combine(_ board: [Int], _ rotations: [Angle]) -> [(Int, [Int], [Angle])] {
+  
+  
 }
 
 func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
@@ -169,35 +174,6 @@ func midpointAngle(_ a1: Double, _ a2: Double) -> Double {
     let backDiff = 2 * .pi - diff
     return normalizeAngle(a2n + backDiff / 2)
   }
-}
-
-
-func findClosestPair(
-  _ rotations: [Angle],
-  _ tapped: CGPoint,
-  _ centerPoint: CGPoint
-) -> (Int, Angle)? {
-  guard rotations.count >= 2 else { return nil }
-  
-  let tapAngle = angleBetween(from: centerPoint, to: tapped)
-  var closestDistance: CGFloat = .greatestFiniteMagnitude
-  var closestResult: (Int, Angle)? = nil
-  
-  for i in 0..<rotations.count {
-    let j = (i + 1) % rotations.count
-    
-    let angle1 = rotations[i].radians
-    let angle2 = rotations[j].radians
-    
-    let mid = midpointAngle(angle1, angle2)
-    
-    let dist = angularDistance(tapAngle, mid)
-    if dist < closestDistance {
-      closestDistance = dist
-      closestResult = (j, Angle(radians: mid))
-    }
-  }
-  return closestResult
 }
 
 //
@@ -247,18 +223,11 @@ func getCirclePoint(_ center: CGPoint, _ radius: CGFloat, _ angleRadians: CGFloa
 }
 
 func insert(
-  _ centerPoint: CGPoint,
-  _ tapped: CGPoint,
+  _ closestIndex: Int,
+  _ midpointAngle: Angle,
   _ rotations: [Angle],
-  _ radius: CGFloat,
   _ appData: AppData
 ) -> (Int, Angle, [Angle]) {
-  // Find index and angle to insert at
-  guard let (closestIndex, midpointAngle) = findClosestPair(rotations, tapped, centerPoint)
-  else {
-    return (0, Angle(degrees: 0), rotations)
-  }
-  
   appData.board.insert(appData.center, at: closestIndex)
   
   let increment = 2 * Double.pi / Double(rotations.count+1)
@@ -282,27 +251,4 @@ func insert(
   appData.board.remove(at: closestIndex)
   
   return (closestIndex, midpointAngle, newRotations)
-}
-
-/// Return index of tapped item in rotations
-func absorb(_ tapped: CGPoint, _ center: CGPoint, _ radius: CGFloat, _ rotations: [Angle]) -> Int {
-    // Compute angle of tap relative to circle center
-    let dx = tapped.x - center.x
-    let dy = tapped.y - center.y
-    var tapAngle = atan2(dy, dx)   // radians, from -π to π
-    
-    if tapAngle < 0 { tapAngle += 2 * .pi }
-    var closestIndex = 0
-    var minDelta = CGFloat.greatestFiniteMagnitude
-    
-    for (i, angle) in rotations.enumerated() {
-        var candidate = CGFloat(angle.radians)
-        if candidate < 0 { candidate += 2 * .pi }
-        let delta = abs(atan2(sin(tapAngle - candidate), cos(tapAngle - candidate)))
-        if delta < minDelta {
-            minDelta = delta
-            closestIndex = i
-        }
-    }
-    return closestIndex
 }

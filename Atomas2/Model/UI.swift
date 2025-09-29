@@ -34,12 +34,13 @@ struct Tile: View {
   var element: Int
   var elements: [Int: Element]
   var rotation: Angle
+  var size: CGFloat
   
   var body: some View {
     ZStack {
       Circle()
         .fill(Color(UIColor(rgb: elements[element]!.color)))
-        .frame(width: 50, height: 50)
+        .frame(width: size, height: size)
         .allowsHitTesting(false)
       
       VStack {

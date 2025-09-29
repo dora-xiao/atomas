@@ -11,6 +11,7 @@ struct GameView: View {
   @EnvironmentObject var appData : AppData
   let center: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
   let radius: CGFloat = UIScreen.main.bounds.width/2-60
+  let size: CGFloat = 50
   @State var rotations: [Angle] = []
   @State var tapped: CGPoint = CGPoint(x: 0, y: 0)
   @State var destIndex: Int = 0
@@ -40,32 +41,31 @@ struct GameView: View {
               }
               
               // Restrict tappable area
-              let distanceToCenter = distance(tapped, center)
-              if(distanceToCenter > radius+20 || distanceToCenter < radius/2) { // tappable area
-                self.tapped = CGPoint(x: 0, y: 0)
-                return
-              }
-              
-              if(appData.prevCenter == -1) { // Handle minus element convert to plus
+              let didTapCenter = tappedCenter(tapped, center, radius, size)
+              let (tileIndex, tileAngle) = tappedTile(tapped, center, rotations, radius, size)
+              let (spaceIndex, spaceAngle) = tappedSpace(tapped, center, rotations, radius, size)
+              if(appData.prevCenter == -1 && didTapCenter) {
+                // Center is element absorbed by previous minus, tapping converts it to a plus
                 appData.prevCenter = appData.center
                 appData.center = -2
-              } else if(appData.center == -1) { // Handle minus absorb
-                let absorbed = absorb(tapped, center, radius, rotations)
-                // TODO: Slide absorbed tile from circle to center and rearrange tiles around circle
+              } else if(appData.center == -3 && tileIndex > -1) {
+                // Center is a neutrino, tapping causes copying
+                appData.prevCenter = -3
+                appData.center = appData.board[tileIndex]
+              } else if(appData.center == -1 && tileIndex > -1) {
+                // Center is a minus, tapping a tile causes absorption
+                appData.prevCenter = -1
+                appData.center = appData.board[tileIndex]
+                
+                // TODO: shoot and rearrange
+                
+              } else if((appData.center > 0 || appData.center == -2) && spaceIndex > -1) {
+                // Center is an element tile or a plus, tapping a space causes insertion
                 appData.prevCenter = appData.center
-                appData.center = appData.board[absorbed]
-              } else if(appData.center == -3) { // Handle neutrino copy
-                let copied = absorb(tapped, center, radius, rotations)
-                print("Copied \(appData.board[copied])")
-                appData.prevCenter = appData.center
-                appData.center = appData.board[copied]
-              } else {
-                withAnimation(.linear(duration: 0.2)){
+                withAnimation(.linear(duration: 0.2)) {
                   self.disabled = true
                   // Slide to rearrange
-                  let (destIndex, destAngle, newRotations) = insert(
-                    self.center, self.tapped, self.rotations, self.radius, self.appData
-                  )
+                  let (destIndex, destAngle, newRotations) = insert(spaceIndex, spaceAngle, rotations, appData)
                   self.destIndex = destIndex
                   self.destAngle = destAngle
                   self.rotations = newRotations
@@ -77,9 +77,17 @@ struct GameView: View {
                   self.appData.center = spawn(appData: self.appData)
                   self.centerPos = self.center
                   
-                  // TODO: Handle plus combines
-                  self.disabled = false
+                  // Check for combining
+                  withAnimation(.linear(duration: 0.2)) {
+                    // TODO: check for things to combine then animate
+                  } completion: {
+                    // TODO:
+                    self.disabled = false
+                  }
                 }
+              } else { // No valid combinations of taps and game states
+                self.tapped = CGPoint(x: 0, y: 0)
+                return
               }
             }
         )
@@ -98,16 +106,16 @@ struct GameView: View {
       Circle()
         .stroke(Color.gray, lineWidth: 1)
         .frame(width: UIScreen.main.bounds.width-50, height: UIScreen.main.bounds.width-50)
-            
+      
       // Elements around circle
       ForEach(0..<rotations.count, id: \.self) { i in
-        Tile(element: appData.board[i], elements: appData.elements, rotation: rotations[i])
+        Tile(element: appData.board[i], elements: appData.elements, rotation: rotations[i], size: size)
           .offset(x: radius)
           .rotationEffect(rotations[i])
       }
       
       // Center element
-      Tile(element: appData.center, elements: appData.elements, rotation: Angle(degrees: 0))
+      Tile(element: appData.center, elements: appData.elements, rotation: Angle(degrees: 0), size: size)
         .position(centerPos)
       
       // DEBUG: Tapped spot
@@ -120,4 +128,65 @@ struct GameView: View {
       self.rotations = initArrange(appData.board.count)
     }
   }
+}
+
+/// Determine whether the tapped location was the center
+func tappedCenter(_ tapped: CGPoint, _ center: CGPoint, _ radius: CGFloat, _ size: CGFloat) -> Bool {
+  let distanceToCenter = distance(tapped, center)
+  return distanceToCenter < size
+}
+
+/// Determine whether the tapped location was a valid tile, and if so, return the index and angle that was tapped
+func tappedTile(_ tapped: CGPoint, _ center: CGPoint, _ rotations: [Angle], _ radius: CGFloat, _ size: CGFloat) -> (Int, Angle) {
+  let distanceToCenter = distance(tapped, center)
+  if(distanceToCenter < radius * 0.70 || distanceToCenter > radius + size / 2) {
+    return (-1, Angle(degrees: 0))
+  }
+  
+  // Compute angle of tap relative to circle center
+  let dx = tapped.x - center.x
+  let dy = tapped.y - center.y
+  var tapAngle = atan2(dy, dx)   // radians, from -π to π
+  
+  if tapAngle < 0 { tapAngle += 2 * .pi }
+  var closestIndex = 0
+  var minDelta = CGFloat.greatestFiniteMagnitude
+  
+  for (i, angle) in rotations.enumerated() {
+    var candidate = CGFloat(angle.radians)
+    if candidate < 0 { candidate += 2 * .pi }
+    let delta = abs(atan2(sin(tapAngle - candidate), cos(tapAngle - candidate)))
+    if delta < minDelta {
+      minDelta = delta
+      closestIndex = i
+    }
+  }
+  return (closestIndex, rotations[closestIndex])
+}
+
+/// Determine whether the tapped location was a valid space, and if so, return the index and angle to insert at
+func tappedSpace(_ tapped: CGPoint, _ center: CGPoint, _ rotations: [Angle], _ radius: CGFloat, _ size: CGFloat) -> (Int, Angle) {
+  let distanceToCenter = distance(tapped, center)
+  if(distanceToCenter < radius * 0.70 || distanceToCenter > radius + size / 2) {
+    return (-1, Angle(degrees: 0))
+  }
+  
+  // Find index and angle to insert at
+  var closestResult: (Int, Angle) = (-1, Angle(degrees: 0))
+  guard rotations.count >= 2 else { return closestResult }
+  let tapAngle = angleBetween(from: center, to: tapped)
+  var closestDistance: CGFloat = .greatestFiniteMagnitude
+  
+  for i in 0..<rotations.count {
+    let j = (i + 1) % rotations.count
+    let angle1 = rotations[i].radians
+    let angle2 = rotations[j].radians
+    let mid = midpointAngle(angle1, angle2)
+    let dist = angularDistance(tapAngle, mid)
+    if dist < closestDistance {
+      closestDistance = dist
+      closestResult = (j, Angle(radians: mid))
+    }
+  }
+  return closestResult
 }
