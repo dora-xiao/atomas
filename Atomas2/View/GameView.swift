@@ -171,13 +171,8 @@ func tappedTile(
   for (i, angle) in rotations.enumerated() {
     var candidate = CGFloat(angle.radians)
     if candidate < 0 { candidate += 2 * .pi }
-    
-    // Angular difference
     let delta = abs(atan2(sin(tapAngle - candidate), cos(tapAngle - candidate)))
-    
-    // Convert to arc length
     let arcLength = radius * delta
-    
     if arcLength < size / 2 && arcLength < minDelta {
       minDelta = arcLength
       closestIndex = i

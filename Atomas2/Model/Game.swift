@@ -256,5 +256,23 @@ func insert(
 
 
 func absorb(_ tileIndex: Int, _ tileAngle: Angle, _ rotations: [Angle], _ appData: AppData) -> [Angle] {
-  return rotations
+  let absorbed = appData.board.remove(at: tileIndex)
+  
+  let increment = 2 * Double.pi / Double(rotations.count-1)
+  var newRotations: [Angle] = Array(repeating: .radians(0), count: rotations.count)
+  newRotations[tileIndex] = tileAngle
+  appData.board.insert(absorbed, at: tileIndex)
+    
+  for i in 1..<newRotations.count {
+    let j = (i + tileIndex) % newRotations.count
+    var newRotation = Angle(radians: tileAngle.radians + Double(i) * increment)
+    if(newRotation.degrees - rotations[j].degrees > 190) {
+      newRotation.degrees -= 360
+    } else if(newRotation.degrees - rotations[j].degrees < -190) {
+      newRotation.degrees += 360
+    }
+    newRotations[j] = newRotation
+  }
+  
+  return newRotations
 }
