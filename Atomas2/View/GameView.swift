@@ -16,6 +16,7 @@ struct GameView: View {
   @State var destIndex: Int = 0
   @State var destAngle: Angle = Angle(degrees: 0)
   @State var centerPos: CGPoint = CGPoint(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2-40)
+  @State var disabled: Bool = false
   
   var body: some View {
     ZStack {
@@ -24,37 +25,61 @@ struct GameView: View {
         .gesture(
           DragGesture(minimumDistance: 0)
             .onEnded { value in
+              // Ignore tap if disabled
+              if(self.disabled) {
+                return
+              }
+              
+              self.tapped = value.location
+              print("Tapped at \(tapped)")
+              
               // Don't allow more than 18 tiles
               if(appData.board.count >= 18) {
                 self.tapped = CGPoint(x: 0, y: 0)
                 return
               }
-              self.tapped = value.location
-              print("Tapped at \(tapped)")
               
               // Restrict tappable area
               let distanceToCenter = distance(tapped, center)
-              if(distanceToCenter > radius+10 || distanceToCenter < radius/2) { // tappable area
+              if(distanceToCenter > radius+20 || distanceToCenter < radius/2) { // tappable area
                 self.tapped = CGPoint(x: 0, y: 0)
                 return
               }
               
-              // Animate insertion
-              withAnimation(.linear(duration: 0.2)){
-                // Slide to rearrange
-                let (destIndex, destAngle, newRotations) = insert(
-                  self.center, self.tapped, self.rotations, self.radius, self.appData
-                )
-                self.destIndex = destIndex
-                self.destAngle = destAngle
-                self.rotations = newRotations
-                self.centerPos = getCirclePoint(self.center, self.radius, self.destAngle.radians)
-              } completion: {
-                // Add center to board/rotations and spawn a new center
-                self.appData.board.insert(appData.center, at: self.destIndex)
-                self.rotations.insert(self.destAngle, at: self.destIndex)
-                self.appData.center = spawn(appData: self.appData)
-                self.centerPos = self.center
+              if(appData.prevCenter == -1) { // Handle minus element convert to plus
+                appData.prevCenter = appData.center
+                appData.center = -2
+              } else if(appData.center == -1) { // Handle minus absorb
+                let absorbed = absorb(tapped, center, radius, rotations)
+                // TODO: Slide absorbed tile from circle to center and rearrange tiles around circle
+                appData.prevCenter = appData.center
+                appData.center = appData.board[absorbed]
+              } else if(appData.center == -3) { // Handle neutrino copy
+                let copied = absorb(tapped, center, radius, rotations)
+                print("Copied \(appData.board[copied])")
+                appData.prevCenter = appData.center
+                appData.center = appData.board[copied]
+              } else {
+                withAnimation(.linear(duration: 0.2)){
+                  self.disabled = true
+                  // Slide to rearrange
+                  let (destIndex, destAngle, newRotations) = insert(
+                    self.center, self.tapped, self.rotations, self.radius, self.appData
+                  )
+                  self.destIndex = destIndex
+                  self.destAngle = destAngle
+                  self.rotations = newRotations
+                  self.centerPos = getCirclePoint(self.center, self.radius, self.destAngle.radians)
+                } completion: {
+                  // Add center to board/rotations and spawn a new center
+                  self.appData.board.insert(appData.center, at: self.destIndex)
+                  self.rotations.insert(self.destAngle, at: self.destIndex)
+                  self.appData.center = spawn(appData: self.appData)
+                  self.centerPos = self.center
+                  
+                  // TODO: Handle plus combines
+                  self.disabled = false
+                }
               }
             }
         )
@@ -73,9 +98,7 @@ struct GameView: View {
       Circle()
         .stroke(Color.gray, lineWidth: 1)
         .frame(width: UIScreen.main.bounds.width-50, height: UIScreen.main.bounds.width-50)
-      
-      // TODO: Longest chain highlight
-      
+            
       // Elements around circle
       ForEach(0..<rotations.count, id: \.self) { i in
         Tile(element: appData.board[i], elements: appData.elements, rotation: rotations[i])
@@ -88,10 +111,10 @@ struct GameView: View {
         .position(centerPos)
       
       // DEBUG: Tapped spot
-//      Circle()
-//        .fill(.red)
-//        .frame(width: 5, height: 5)
-//        .position(x: tapped.x, y: tapped.y)
+      //      Circle()
+      //        .fill(.red)
+      //        .frame(width: 5, height: 5)
+      //        .position(x: tapped.x, y: tapped.y)
     }
     .onAppear {
       self.rotations = initArrange(appData.board.count)

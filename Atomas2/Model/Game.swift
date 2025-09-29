@@ -96,6 +96,7 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
+  return -3
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
@@ -281,4 +282,27 @@ func insert(
   appData.board.remove(at: closestIndex)
   
   return (closestIndex, midpointAngle, newRotations)
+}
+
+/// Return index of tapped item in rotations
+func absorb(_ tapped: CGPoint, _ center: CGPoint, _ radius: CGFloat, _ rotations: [Angle]) -> Int {
+    // Compute angle of tap relative to circle center
+    let dx = tapped.x - center.x
+    let dy = tapped.y - center.y
+    var tapAngle = atan2(dy, dx)   // radians, from -π to π
+    
+    if tapAngle < 0 { tapAngle += 2 * .pi }
+    var closestIndex = 0
+    var minDelta = CGFloat.greatestFiniteMagnitude
+    
+    for (i, angle) in rotations.enumerated() {
+        var candidate = CGFloat(angle.radians)
+        if candidate < 0 { candidate += 2 * .pi }
+        let delta = abs(atan2(sin(tapAngle - candidate), cos(tapAngle - candidate)))
+        if delta < minDelta {
+            minDelta = delta
+            closestIndex = i
+        }
+    }
+    return closestIndex
 }

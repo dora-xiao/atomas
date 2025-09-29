@@ -20,6 +20,7 @@ class AppData: ObservableObject {
   @Published var score: Int = 0
   @Published var board: [Int] = [1, 1, 1, 1, 1, 1]
   @Published var center: Int = 1
+  @Published var prevCenter: Int = 1
   @Published var lastPlus: Int = 0
   @Published var moves: Int = 0
   
