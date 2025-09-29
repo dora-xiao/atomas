@@ -146,9 +146,15 @@ func tappedCenter(_ tapped: CGPoint, _ center: CGPoint, _ radius: CGFloat, _ siz
 }
 
 /// Determine whether the tapped location was a valid tile, and if so, return the index and angle that was tapped
-func tappedTile(_ tapped: CGPoint, _ center: CGPoint, _ rotations: [Angle], _ radius: CGFloat, _ size: CGFloat) -> (Int, Angle) {
+func tappedTile(
+  _ tapped: CGPoint,
+  _ center: CGPoint,
+  _ rotations: [Angle],
+  _ radius: CGFloat,
+  _ size: CGFloat
+) -> (Int, Angle) {
   let distanceToCenter = distance(tapped, center)
-  if(distanceToCenter < radius * 0.70 || distanceToCenter > radius + size / 2) {
+  if distanceToCenter < radius * 0.70 || distanceToCenter > radius + size / 2 {
     return (-1, Angle(degrees: 0))
   }
   
@@ -159,18 +165,27 @@ func tappedTile(_ tapped: CGPoint, _ center: CGPoint, _ rotations: [Angle], _ ra
   
   if tapAngle < 0 { tapAngle += 2 * .pi }
   var closestIndex = 0
+  var found = false
   var minDelta = CGFloat.greatestFiniteMagnitude
   
   for (i, angle) in rotations.enumerated() {
     var candidate = CGFloat(angle.radians)
     if candidate < 0 { candidate += 2 * .pi }
+    
+    // Angular difference
     let delta = abs(atan2(sin(tapAngle - candidate), cos(tapAngle - candidate)))
-    if delta < minDelta {
-      minDelta = delta
+    
+    // Convert to arc length
+    let arcLength = radius * delta
+    
+    if arcLength < size / 2 && arcLength < minDelta {
+      minDelta = arcLength
       closestIndex = i
+      found = true
     }
   }
-  return (closestIndex, rotations[closestIndex])
+  
+  return found ? (closestIndex, rotations[closestIndex]) : (-1, Angle(degrees: 0))
 }
 
 /// Determine whether the tapped location was a valid space, and if so, return the index and angle to insert at
