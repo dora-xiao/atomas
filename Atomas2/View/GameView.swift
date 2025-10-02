@@ -87,10 +87,16 @@ struct GameView: View {
                   self.centerPos = self.center
                   
                   // Check for combining
-                  withAnimation(.linear(duration: 0.2)) {
-                    // TODO: check for things to combine then animate
-                  } completion: {
-                    // TODO:
+                  let (didCombine, animRotations, newBoard, newRotations, combinedVal) = combine(appData, rotations)
+                  if(didCombine) {
+                    withAnimation(.linear(duration: 0.2)) {
+                      self.rotations = animRotations
+                    } completion: {
+                      self.rotations = newRotations
+                      self.appData.board = newBoard
+                      self.disabled = false
+                    }
+                  } else {
                     self.disabled = false
                   }
                 }

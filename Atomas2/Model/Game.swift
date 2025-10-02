@@ -96,7 +96,7 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
-  return -1
+  return -2
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
@@ -133,10 +133,68 @@ func combineValue(center: Int, outer: Int) -> Int {
   }
 }
 
-/// Returns a list of tuples of the fixed index and the board states
-func combine(_ board: [Int], _ rotations: [Angle]) -> [(Int, [Int], [Angle])] {
+/// Returns whether combining occurred, the animation rotations, the final board, and the final rotations after combining
+func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int], [Angle], Int) {
+  var animRotations: [Angle] = Array(repeating: .radians(0), count: rotations.count)
+  var combinedIdx: Int = -1
+  var combinedIdxs: [Int] = []
+  var combinedVal: Int = 0
   
-  return []
+  // Find chain to combine if exists
+  let l = appData.board.count
+  for i in 0..<appData.board.count {
+    if(appData.board[i] == -2) {
+      var prev = ((i-1)%l+l)%l
+      var next = ((i+1)%l+l)%l
+      if(appData.board[prev] != appData.board[next]) { continue }
+      combinedIdx = i
+      while(appData.board[prev] == appData.board[next]) {
+        combinedVal = combineValue(center: combinedVal, outer: appData.board[prev])
+        combinedIdxs.append(prev)
+        combinedIdxs.append(next)
+        prev = ((prev-1)%l+l)%l
+        next = ((next+1)%l+l)%l
+      }
+    }
+  }
+  if(combinedIdx == -1) { return (false, [], [], [], -1) } // no plus found
+  
+  print("Combining \(appData.elements[appData.board[combinedIdx]]!.symbol) at index \(combinedIdx) with \(combinedIdxs.map{appData.elements[appData.board[$0]]!.symbol}) to get \(appData.elements[combinedVal]!.symbol)")
+  
+  // Calculate rotations for the combine animation
+  let increment = 2 * Double.pi / Double(rotations.count-combinedIdxs.count)
+  animRotations[combinedIdx] = rotations[combinedIdx]
+  for i in combinedIdxs {
+    animRotations[i] = rotations[combinedIdx]
+  }
+    
+  for i in 1..<animRotations.count {
+    let j = (i + combinedIdx) % animRotations.count
+    if(combinedIdxs.contains(j)){ continue }
+    var newRotation = Angle(radians: rotations[combinedIdx].radians + (Double(i)-1) * increment)
+    if(newRotation.degrees - rotations[j].degrees > 190) {
+      newRotation.degrees -= 360
+    } else if(newRotation.degrees - rotations[j].degrees < -190) {
+      newRotation.degrees += 360
+    }
+    animRotations[j] = newRotation
+  }
+  
+//  for i in 0..<animRotations.count {
+//    print("\(String(Int(round(rotations[i].degrees)))) to \(String(Int(round(animRotations[i].degrees)))) \(appData.elements[appData.board[i]]!.symbol)")
+//  }
+  
+  // Remove the combined elements for the final board/rotations
+  var newBoard: [Int] = appData.board
+  var newRotations: [Angle] = animRotations
+  combinedIdxs.sort(by: >)
+  newBoard[combinedIdx] = combinedVal
+  for i in combinedIdxs {
+    newBoard.remove(at: i)
+    newRotations.remove(at: i)
+  }
+  
+  return (true, animRotations, newBoard, newRotations, combinedVal)
 }
 
 func distance(_ point1: CGPoint, _ point2: CGPoint) -> CGFloat {
