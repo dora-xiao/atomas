@@ -96,7 +96,6 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
-  return -2
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
@@ -172,9 +171,9 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
     let j = (i + combinedIdx) % animRotations.count
     if(combinedIdxs.contains(j)){ continue }
     var newRotation = Angle(radians: rotations[combinedIdx].radians + (Double(i)-1) * increment)
-    if(newRotation.degrees - rotations[j].degrees > 190) {
+    if(newRotation.degrees - rotations[j].degrees > 180) {
       newRotation.degrees -= 360
-    } else if(newRotation.degrees - rotations[j].degrees < -190) {
+    } else if(newRotation.degrees - rotations[j].degrees < -180) {
       newRotation.degrees += 360
     }
     animRotations[j] = newRotation
