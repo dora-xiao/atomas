@@ -14,4 +14,6 @@ extension Game {
   @NSManaged public var board: [Int]?
   @NSManaged public var moves: Int32
   @NSManaged public var lastPlus: Int32
+  @NSManaged public var prevCenter: Int32
+  @NSManaged public var seen: Int32
 }

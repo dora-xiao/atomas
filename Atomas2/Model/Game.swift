@@ -96,7 +96,6 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
-  return -2
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {

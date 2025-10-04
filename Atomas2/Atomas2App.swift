@@ -23,6 +23,7 @@ class AppData: ObservableObject {
   @Published var prevCenter: Int = 1
   @Published var lastPlus: Int = 0
   @Published var moves: Int = 0
+  @Published var seen: Int = 0
   
   let context: NSManagedObjectContext
   var elements: [Int: Element] = [:]
@@ -45,7 +46,9 @@ class AppData: ObservableObject {
         self.board = existingGame.board ?? []
         self.moves = Int(existingGame.moves)
         self.lastPlus = Int(existingGame.lastPlus)
-        print("Loaded game: Score = \(self.score), Board = \(self.board), Center = \(self.center), Moves = \(self.moves), lastPlus = \(self.lastPlus)")
+        self.prevCenter = Int(existingGame.prevCenter)
+        self.seen = Int(existingGame.seen)
+        print("Loaded game: Score = \(self.score), Board = \(self.board), Center = \(self.center), Moves = \(self.moves), lastPlus = \(self.lastPlus), prevCenter = \(self.prevCenter), seen = \(self.seen)")
       } else {
         createAndLoadNewGame()
       }
@@ -97,6 +100,8 @@ class AppData: ObservableObject {
     newGame.score = 0
     newGame.lastPlus = 0
     newGame.moves = 0
+    newGame.prevCenter = 0
+    newGame.seen = Int32(temp.max()!)
     
     do {
       try self.context.save()
@@ -108,8 +113,8 @@ class AppData: ObservableObject {
       self.moves = 0
       
       // TODO: delete after testing
-      self.board = [1, 1, 3, 2, 3, 2, 2, 1, 1, 2, 2]
-      self.center = -2
+//      self.board = [1, 1, 3, 2, 3, 2, 2, 1, 1, 2, 2]
+//      self.center = -2
       
       print("Started new game: Score = \(self.score), Board = \(self.board), Center = \(self.center), Moves = \(self.moves), lastPlus = \(self.lastPlus)")
     } catch {
@@ -129,6 +134,26 @@ class AppData: ObservableObject {
           print("Failed to fetch saved games: \(error)")
       }
   }
+  
+  func saveGame() {
+      guard let game = self.game else { return }
+
+      game.score = Int32(self.score)
+      game.center = Int32(self.center)
+      game.board = self.board
+      game.moves = Int32(self.moves)
+      game.lastPlus = Int32(self.lastPlus)
+      game.prevCenter = Int32(self.prevCenter)
+      game.seen = Int32(self.seen)
+
+      do {
+          try self.context.save()
+          print("Saved game")
+      } catch {
+          print("Failed to save game: \(error)")
+      }
+  }
+
 
   
 }

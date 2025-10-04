@@ -26,6 +26,7 @@ extension UIColor {
 extension Color {
   static let customGrey = Color(UIColor(rgb: 0xE6E6E6))
   static let customWhite = Color(UIColor(rgb: 0xFAFAFA))
+  static let backgroundColor = Color(UIColor(rgb: 0x282C34))
 }
 
 
@@ -41,6 +42,7 @@ struct Tile: View {
       Circle()
         .fill(Color(UIColor(rgb: elements[element]!.color)))
         .frame(width: size, height: size)
+        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 0)
         .allowsHitTesting(false)
       
       VStack {
@@ -71,10 +73,10 @@ struct GhostButtonStyle: ButtonStyle {
       .padding(.vertical, 10)
       .background(
         RoundedRectangle(cornerRadius: 8)
-          .stroke(Color.accentColor, lineWidth: 2) // Border color and width
+          .stroke(.white, lineWidth: 2) // Border color and width
           .opacity(configuration.isPressed ? 0.6 : 1.0) // Opacity change on press
       )
-      .foregroundColor(Color.accentColor) // Text color
+      .foregroundColor(.white) // Text color
       .scaleEffect(configuration.isPressed ? 0.98 : 1.0) // Scale effect on press
       .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
   }

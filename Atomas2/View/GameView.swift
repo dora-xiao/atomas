@@ -22,7 +22,8 @@ struct GameView: View {
   
   var body: some View {
     ZStack {
-      Color.clear
+      Color.backgroundColor
+        .ignoresSafeArea(.all)
         .contentShape(Rectangle())
         .gesture(
           DragGesture(minimumDistance: 0)
@@ -106,6 +107,7 @@ struct GameView: View {
                 self.tapped = CGPoint(x: 0, y: 0)
                 return
               }
+              self.appData.saveGame()
             }
         )
       
@@ -118,6 +120,17 @@ struct GameView: View {
       }
       .buttonStyle(.ghost)
       .position(x: 60, y: 30)
+      
+      // Score
+      VStack {
+        Text("\(appData.score)")
+          .font(.system(size: 20))
+          .foregroundStyle(.white)
+        Text("\(appData.seen)")
+          .font(.system(size: 16))
+          .foregroundStyle(.white)
+      }.frame(maxWidth: .infinity)
+        .position(x: UIScreen.main.bounds.width / 2, y: 150)
       
       // Circle outline
       Circle()
