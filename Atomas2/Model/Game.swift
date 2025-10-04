@@ -96,6 +96,7 @@ extension Array {
 
 // Spawn next center tile
 func spawn(appData: AppData) -> Int {
+  return -2
   appData.moves += 1
   appData.lastPlus += 1
   if(appData.moves % 20 == 0 && appData.moves > 18) {
@@ -145,7 +146,7 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
     if(appData.board[i] == -2) {
       var prev = ((i-1)%l+l)%l
       var next = ((i+1)%l+l)%l
-      if(appData.board[prev] != appData.board[next]) { continue }
+      if(appData.board[prev] != appData.board[next] || appData.board[prev] < 0) { continue }
       combinedIdx = i
       while(appData.board[prev] == appData.board[next]) {
         combinedVal = combineValue(center: combinedVal, outer: appData.board[prev])

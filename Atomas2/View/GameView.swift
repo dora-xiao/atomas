@@ -29,14 +29,16 @@ struct GameView: View {
             .onEnded { value in
               // Ignore tap if disabled
               if(self.disabled) {
+                print("Tap was ignored.")
                 return
               }
               
               self.tapped = value.location
-              print("Tapped at \(tapped)")
+              print("Tapped at \(tapped).")
               
               // Don't allow more than 18 tiles
               if(appData.board.count >= 18) {
+                print("Board is full.")
                 self.tapped = CGPoint(x: 0, y: 0)
                 return
               }
