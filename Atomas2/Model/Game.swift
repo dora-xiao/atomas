@@ -174,9 +174,13 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
   var incIndex = 1
   for i in 1..<animRotations.count {
     let j = (i + combinedIdx) % animRotations.count
-    if(combinedIdxs.contains(j)){ continue }
-    var newRotation = Angle(radians: rotations[combinedIdx].radians + Double(incIndex) * increment)
-    incIndex += 1
+    var newRotation = Angle(degrees: 0)
+    if(combinedIdxs.contains(j)){
+      newRotation = animRotations[j]
+    } else {
+      newRotation = Angle(radians: rotations[combinedIdx].radians + Double(incIndex) * increment)
+      incIndex += 1
+    }
     print("Updating \(appData.elements[appData.board[j]]!.symbol) @ \(j) to \(newRotation.degrees.rounded())")
     if(newRotation.degrees - rotations[j].degrees > 180) {
       newRotation.degrees -= 360
