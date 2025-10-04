@@ -137,7 +137,7 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
   var animRotations: [Angle] = Array(repeating: .radians(0), count: rotations.count)
   var combinedIdx: Int = -1
   var combinedIdxs: [Int] = []
-  var combinedVal: Int = 0
+  var combinedVal: Int = -2
   
   // Find chain to combine if exists
   let l = appData.board.count
@@ -158,30 +158,40 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
   }
   if(combinedIdx == -1) { return (false, [], [], [], -1) } // no plus found
   
-  print("Combining \(appData.elements[appData.board[combinedIdx]]!.symbol) at index \(combinedIdx) with \(combinedIdxs.map{appData.elements[appData.board[$0]]!.symbol}) to get \(appData.elements[combinedVal]!.symbol)")
+  print("\n\nCombining \(appData.elements[appData.board[combinedIdx]]!.symbol) @ index \(combinedIdx) & \(rotations[combinedIdx].degrees.rounded()) deg with \(combinedIdxs.map{"\(appData.elements[appData.board[$0]]!.symbol) @ \($0)"}) to get \(appData.elements[combinedVal]!.symbol) @ \(combinedIdx)")
   
   // Calculate rotations for the combine animation
-  let increment = 2 * Double.pi / Double(rotations.count-combinedIdxs.count)
+  let spaceCt = Double(rotations.count-combinedIdxs.count)
+  let increment = 2 * Double.pi / spaceCt
+  print("Increment: \(increment * 180 / Double.pi) deg for \(spaceCt) spaces")
   animRotations[combinedIdx] = rotations[combinedIdx]
   for i in combinedIdxs {
     animRotations[i] = rotations[combinedIdx]
   }
-    
+  
+  print("After initializing combine rotations: \(appData.board.enumerated().map{i,e in "\n\t\(appData.elements[e]!.symbol) = \(animRotations[i].degrees.rounded())"}.joined(separator: ""))")
+  
+  var incIndex = 1
   for i in 1..<animRotations.count {
     let j = (i + combinedIdx) % animRotations.count
     if(combinedIdxs.contains(j)){ continue }
-    var newRotation = Angle(radians: rotations[combinedIdx].radians + (Double(i)-1) * increment)
+    var newRotation = Angle(radians: rotations[combinedIdx].radians + Double(incIndex) * increment)
+    incIndex += 1
+    print("Updating \(appData.elements[appData.board[j]]!.symbol) @ \(j) to \(newRotation.degrees.rounded())")
     if(newRotation.degrees - rotations[j].degrees > 180) {
       newRotation.degrees -= 360
+      print("\tAdjusted to equivalent value: \(newRotation.degrees.rounded())")
     } else if(newRotation.degrees - rotations[j].degrees < -180) {
       newRotation.degrees += 360
+      print("\tAdjusted to equivalent value: \(newRotation.degrees.rounded())")
     }
     animRotations[j] = newRotation
   }
   
-//  for i in 0..<animRotations.count {
-//    print("\(String(Int(round(rotations[i].degrees)))) to \(String(Int(round(animRotations[i].degrees)))) \(appData.elements[appData.board[i]]!.symbol)")
-//  }
+  print("Final rotations:")
+  for i in 0..<animRotations.count {
+    print("\(appData.elements[appData.board[i]]!.symbol): \(String(Int(round(rotations[i].degrees)))) to \(String(Int(round(animRotations[i].degrees))))")
+  }
   
   // Remove the combined elements for the final board/rotations
   var newBoard: [Int] = appData.board

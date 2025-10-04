@@ -107,6 +107,10 @@ class AppData: ObservableObject {
       self.lastPlus = 0
       self.moves = 0
       
+      // TODO: delete after testing
+      self.board = [1, 1, 3, 2, 3, 2, 2, 1, 1, 2, 2]
+      self.center = -2
+      
       print("Started new game: Score = \(self.score), Board = \(self.board), Center = \(self.center), Moves = \(self.moves), lastPlus = \(self.lastPlus)")
     } catch {
       print("Failed to save new game: \(error)")
