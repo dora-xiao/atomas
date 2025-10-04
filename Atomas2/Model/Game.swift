@@ -148,7 +148,10 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
       var next = ((i+1)%l+l)%l
       if(appData.board[prev] != appData.board[next] || appData.board[prev] < 0) { continue }
       combinedIdx = i
-      while(appData.board[prev] == appData.board[next]) {
+      while appData.board[prev] == appData.board[next] &&
+            appData.board[prev] >= 0 &&
+            (prev + 1) % l != next &&
+            prev != next {
         combinedVal = combineValue(center: combinedVal, outer: appData.board[prev])
         combinedIdxs.append(prev)
         combinedIdxs.append(next)
@@ -157,7 +160,10 @@ func combine(_ appData: AppData, _ rotations: [Angle]) -> (Bool, [Angle], [Int],
       }
     }
   }
-  if(combinedIdx == -1) { return (false, [], [], [], -1) } // no plus found
+  if(combinedIdx == -1) {
+    print("Nothing to combine")
+    return (false, [], [], [], -1)
+  }
   
   print("\n\nCombining \(appData.elements[appData.board[combinedIdx]]!.symbol) @ index \(combinedIdx) & \(rotations[combinedIdx].degrees.rounded()) deg with \(combinedIdxs.map{"\(appData.elements[appData.board[$0]]!.symbol) @ \($0)"}) to get \(appData.elements[combinedVal]!.symbol) @ \(combinedIdx)")
   
@@ -301,6 +307,7 @@ func insert(
   _ rotations: [Angle],
   _ appData: AppData
 ) -> (Int, Angle, [Angle]) {
+  print("Inserting \(appData.center) at \(closestIndex).")
   appData.board.insert(appData.center, at: closestIndex)
   
   let increment = 2 * Double.pi / Double(rotations.count+1)
